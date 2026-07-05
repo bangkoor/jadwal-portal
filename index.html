@@ -3,35 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jadwal Tutup Portal</title>
+    <title>Jadwal Tutup Portal Dinamis</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 0 10px; text-align: center; }
-        .jadwal-container { margin-bottom: 40px; }
-        img { max-width: 100%; height: auto; border: 1px solid #ccc; border-radius: 8px; }
-        h2 { color: #333; margin-top: 20px; }
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 20px auto; 
+            padding: 0 15px; 
+            text-align: center; 
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 { margin-bottom: 5px; color: #222; }
+        .subtitle { color: #666; margin-bottom: 30px; }
+        .jadwal-container { 
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 30px; 
+            border: 1px solid #e0e0e0; 
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        img { 
+            max-width: 100%; 
+            height: auto; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            margin-top: 15px;
+        }
+        .badge {
+            background-color: #007bff;
+            color: white;
+            padding: 4px 10px;
+            font-size: 0.4em;
+            vertical-align: middle;
+            border-radius: 12px;
+            margin-left: 10px;
+            display: inline-block;
+        }
+        .badge.next { background-color: #28a745; }
+        .error-msg { color: #999; font-style: italic; margin: 20px 0; }
     </style>
 </head>
 <body>
 
     <h1>Jadwal Tutup Portal</h1>
-    <p>Silakan lihat atau unduh jadwal bulanan di bawah ini:</p>
+    <p class="subtitle">Menampilkan jadwal untuk bulan ini dan bulan depan secara otomatis</p>
 
-    <hr>
+    <!-- Kontainer utama tempat gambar akan muncul via JavaScript -->
+    <div id="container-jadwal"></div>
 
-    <!-- Contoh menampilkan Gambar Juli 2026 -->
-    <div class="jadwal-container">
-        <h2>Juli 2026</h2>
-        <img src="jadwal_2026_07.jpg" alt="Jadwal Juli 2026">
-    </div>
+    <script>
+        // Daftar nama bulan dalam Bahasa Indonesia
+        const namaBulan = [
+            "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+        ];
 
-    <!-- Contoh menampilkan Gambar Agustus 2026 -->
-    <div class="jadwal-container">
-        <h2>Agustus 2026</h2>
-        <img src="jadwal_2026_08.jpg" alt="Jadwal Agustus 2026">
-    </div>
-	
+        // Mendapatkan tanggal saat ini
+        const sekarang = new Date();
+        
+        // 1. Parameter untuk Bulan Berjalan (Current Month)
+        const blnIniIndex = sekarang.getMonth(); // 0-11
+        const thnIni = sekarang.getFullYear();
+        
+        // 2. Parameter untuk Bulan Berikutnya (Next Month)
+        // Jika bulan ini Desember (11), bulan depan adalah Januari (0) tahun berikutnya
+        const blnDepanIndex = (blnIniIndex === 11) ? 0 : blnIniIndex + 1;
+        const thnDepan = (blnIniIndex === 11) ? thnIni + 1 : thnIni;
 
-    <!-- Anda tinggal menambah blok div di atas untuk bulan-bulan lainnya -->
+        // Fungsi pembantu untuk menambah angka 0 di depan bulan jika < 10 (misal: 07)
+        function formatDuaDigit(angka) {
+            return String(angka).padStart(2, '0');
+        }
+
+        // Jalur data bulan berjalan dan bulan berikutnya
+        const listJadwal = [
+            {
+                label: "Bulan Berjalan",
+                badgeClass: "",
+                nama: namaBulan[blnIniIndex] + " " + thnIni,
+                // Menghasilkan nama file seperti: jadwal_2026_07.jpg
+                filename: `jadwal_${thnIni}_${formatDuaDigit(blnIniIndex + 1)}.jpg`
+            },
+            {
+                label: "Bulan Berikutnya",
+                badgeClass: "next",
+                nama: namaBulan[blnDepanIndex] + " " + thnDepan,
+                // Menghasilkan nama file seperti: jadwal_2026_08.jpg
+                filename: `jadwal_${thnDepan}_${formatDuaDigit(blnDepanIndex + 1)}.jpg`
+            }
+        ];
+
+        const container = document.getElementById('container-jadwal');
+
+        // Render gambar ke HTML secara dinamis
+        listJadwal.forEach(jadwal => {
+            const div = document.createElement('div');
+            div.className = 'jadwal-container';
+
+            div.innerHTML = `
+                <h2>${jadwal.nama} <span class="badge ${jadwal.badgeClass}">${jadwal.label}</span></h2>
+                <img src="${jadwal.filename}" alt="Jadwal ${jadwal.nama}" onerror="this.onerror=null; this.parentElement.innerHTML+='<p class=\'error-msg\'>File gambar <strong>${jadwal.filename}</strong> belum diupload di repository.</p>'; this.remove();">
+            `;
+            
+            container.appendChild(div);
+        });
+    </script>
 
 </body>
 </html>
